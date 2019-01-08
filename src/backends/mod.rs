@@ -5,7 +5,7 @@ mod dialog;
 
 pub use crate::backends::dialog::Dialog;
 
-use std::io::Result;
+use crate::Result;
 
 /// A dialog backend.
 ///

@@ -1,11 +1,9 @@
 // Copyright (C) 2019 Robin Krahl <robin.krahl@ireas.org>
 // SPDX-License-Identifier: MIT
 
-use std::io;
-use std::io::Result;
 use std::process;
 
-use crate::{Choice, Input, Message, Question};
+use crate::{Choice, Error, Input, Message, Question, Result};
 
 /// The `dialog` backend.
 ///
@@ -75,7 +73,7 @@ impl Dialog {
         command.arg(&self.width);
         command.args(post_args);
 
-        command.output()
+        command.output().map_err(Error::IoError)
     }
 }
 
@@ -83,7 +81,7 @@ fn require_success(status: process::ExitStatus) -> Result<()> {
     if status.success() {
         Ok(())
     } else {
-        Err(io::Error::new(io::ErrorKind::Other, "dialog failed"))
+        Err(Error::from(("dialog", status)))
     }
 }
 
@@ -93,16 +91,10 @@ fn get_choice(status: process::ExitStatus) -> Result<Choice> {
             0 => Ok(Choice::Yes),
             1 => Ok(Choice::No),
             255 => Ok(Choice::Cancel),
-            code => Err(io::Error::new(
-                io::ErrorKind::Other,
-                format!("Could not execute dialog: {}", code),
-            )),
+            _ => Err(Error::from(("dialog", status))),
         }
     } else {
-        Err(io::Error::new(
-            io::ErrorKind::Other,
-            "dialog was terminated by a signal",
-        ))
+        Err(Error::from(("dialog", status)))
     }
 }
 
@@ -110,25 +102,17 @@ fn get_stderr(output: process::Output) -> Result<Option<String>> {
     if output.status.success() {
         String::from_utf8(output.stderr)
             .map(|s| Some(s))
-            .map_err(|_| {
-                io::Error::new(io::ErrorKind::Other, "Input contained invalid UTF-8 bytes")
-            })
+            .map_err(|err| Error::from(err))
     } else {
         if let Some(code) = output.status.code() {
             match code {
                 0 => Ok(None),
                 1 => Ok(None),
                 255 => Ok(None),
-                code => Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    format!("Could not execute dialog: {}", code),
-                )),
+                _ => Err(Error::from(("dialog", output.status))),
             }
         } else {
-            Err(io::Error::new(
-                io::ErrorKind::Other,
-                "dialog was terminated by a signal",
-            ))
+            Err(Error::from(("dialog", output.status)))
         }
     }
 }

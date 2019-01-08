@@ -1,11 +1,9 @@
 // Copyright (C) 2019 Robin Krahl <robin.krahl@ireas.org>
 // SPDX-License-Identifier: MIT
 
-use std::io::Result;
-
 use dialog::DialogBox;
 
-fn main() -> Result<()> {
+fn main() -> dialog::Result<()> {
     let input1 = dialog::Input::new("Please enter something").show()?;
     let input2 = dialog::Input::new("Please enter something")
         .title("Input form")
