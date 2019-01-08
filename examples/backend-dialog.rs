@@ -6,28 +6,21 @@ use std::io::Result;
 use dialog::backends;
 use dialog::DialogBox;
 
-#[test]
-fn message() -> Result<()> {
+fn main() -> Result<()> {
+    let mut backend = backends::Dialog::new();
+
     dialog::Message::new("This is a message.")
         .title("And this is a title:")
-        .show_with(&backends::Dialog::new())
-}
+        .show_with(&backend)?;
 
-#[test]
-fn backtitle() -> Result<()> {
-    let mut backend = backends::Dialog::new();
     backend.set_backtitle("Backtitle");
     dialog::Message::new("This is a message.")
         .title("And this is a title:")
-        .show_with(&backend)
-}
+        .show_with(&backend)?;
 
-#[test]
-fn size() -> Result<()> {
-    let mut backend = backends::Dialog::new();
     backend.set_width(100);
     backend.set_height(10);
-    dialog::Message::new("This is a message.")
+    dialog::Message::new("This is a message with a fixed size.")
         .title("And this is a title:")
         .show_with(&backend)
 }

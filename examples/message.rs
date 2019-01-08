@@ -5,13 +5,9 @@ use std::io::Result;
 
 use dialog::DialogBox;
 
-#[test]
-fn text() -> Result<()> {
-    dialog::Message::new("This is a message.").show()
-}
+fn main() -> Result<()> {
+    dialog::Message::new("This is a message.").show()?;
 
-#[test]
-fn text_title() -> Result<()> {
     dialog::Message::new("This is a message.")
         .title("And this is a title:")
         .show()
