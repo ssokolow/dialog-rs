@@ -1,0 +1,14 @@
+[package]
+name = "dialog"
+version = "0.1.0"
+authors = ["Robin Krahl <robin.krahl@ireas.org>"]
+edition = "2018"
+repository = "https://git.ireas.org/dialog-rs/"
+documentation = "https://docs.rs/dialog"
+description = "Display dialog boxes using various backends"
+keywords = ["ui", "dialog"]
+categories = ["command-line-interface", "gui"]
+readme = "README.md"
+license = "MIT"
+
+[dependencies]
