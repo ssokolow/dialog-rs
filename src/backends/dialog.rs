@@ -5,7 +5,7 @@ use std::io;
 use std::io::Result;
 use std::process;
 
-use crate::{Input, Message};
+use crate::{Choice, Input, Message, Question};
 
 /// The `dialog` backend.
 ///
@@ -87,6 +87,25 @@ fn require_success(status: process::ExitStatus) -> Result<()> {
     }
 }
 
+fn get_choice(status: process::ExitStatus) -> Result<Choice> {
+    if let Some(code) = status.code() {
+        match code {
+            0 => Ok(Choice::Yes),
+            1 => Ok(Choice::No),
+            255 => Ok(Choice::Cancel),
+            code => Err(io::Error::new(
+                io::ErrorKind::Other,
+                format!("Could not execute dialog: {}", code),
+            )),
+        }
+    } else {
+        Err(io::Error::new(
+            io::ErrorKind::Other,
+            "dialog was terminated by a signal",
+        ))
+    }
+}
+
 fn get_stderr(output: process::Output) -> Result<Option<String>> {
     if output.status.success() {
         String::from_utf8(output.stderr)
@@ -99,10 +118,10 @@ fn get_stderr(output: process::Output) -> Result<Option<String>> {
             match code {
                 0 => Ok(None),
                 1 => Ok(None),
-                -1 => Ok(None),
-                _ => Err(io::Error::new(
+                255 => Ok(None),
+                code => Err(io::Error::new(
                     io::ErrorKind::Other,
-                    "Could not execute dialog",
+                    format!("Could not execute dialog: {}", code),
                 )),
             }
         } else {
@@ -130,5 +149,11 @@ impl super::Backend for Dialog {
         self.execute(args, vec![], &message.title)
             .and_then(|output| require_success(output.status))
             .map(|_| ())
+    }
+
+    fn show_question(&self, question: &Question) -> Result<Choice> {
+        let args = vec!["--yesno", &question.text];
+        self.execute(args, vec![], &question.title)
+            .and_then(|output| get_choice(output.status))
     }
 }

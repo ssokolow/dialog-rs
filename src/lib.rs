@@ -9,6 +9,7 @@
 //! are:
 //! - [`Input`][]: a text input dialog
 //! - [`Message`][]: a simple message box
+//! - [`Question`][]: a question dialog box
 //!
 //! These dialog boxes can be displayed using various backends:
 //! - [`Dialog`][]: uses `dialog` to display ncurses-based dialog boxes (requires the external
@@ -64,6 +65,7 @@
 //! [`Dialog`]: backends/struct.Dialog.html
 //! [`Input`]: struct.Input.html
 //! [`Message`]: struct.Message.html
+//! [`Question`]: struct.Question.html
 //! [`default_backend`]: fn.default_backend.html
 //! [`show`]: trait.DialogBox.html#method.show
 //! [`show_with`]: trait.DialogBox.html#method.show_with
@@ -200,6 +202,64 @@ impl DialogBox for Input {
 
     fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
         backend.show_input(self)
+    }
+}
+
+/// A user choise in a dialog box.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Choice {
+    /// The yes button.
+    Yes,
+    /// The no button.
+    No,
+    /// The cancel button or a cancelled dialog.
+    Cancel,
+}
+
+/// A question dialog box.
+///
+/// This dialog box displays a text and an optional title and has a yes and a no button.  The
+/// output is the button presed by the user, or Cancel if the dialog has been cancelled.
+///
+/// # Example
+///
+/// ```no_run
+/// use dialog::DialogBox;
+///
+/// let choice = dialog::Question::new("Do you want to continue?")
+///     .title("Question")
+///     .show()
+///     .expect("Could not display dialog box");
+/// println!("The user chose: {:?}", choice);
+/// ```
+pub struct Question {
+    text: String,
+    title: Option<String>,
+}
+
+impl Question {
+    /// Creates a new question dialog with the given text.
+    pub fn new(text: impl Into<String>) -> Question {
+        Question {
+            text: text.into(),
+            title: None,
+        }
+    }
+
+    /// Sets the title of this question dialog box.
+    ///
+    /// This method returns a reference to `self` to enable chaining.
+    pub fn title(&mut self, title: impl Into<String>) -> &mut Question {
+        self.title = Some(title.into());
+        self
+    }
+}
+
+impl DialogBox for Question {
+    type Output = Choice;
+
+    fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
+        backend.show_question(self)
     }
 }
 
