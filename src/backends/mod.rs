@@ -17,6 +17,9 @@ use std::io::Result;
 /// [`default_backend`]: ../function.default_backend.html
 /// [`show_with`]: ../trait.DialogBox.html#method.show_with
 pub trait Backend {
+    /// Shows the given input dialog and returns the input.
+    fn show_input(&self, input: &super::Input) -> Result<Option<String>>;
+
     /// Shows the given message dialog.
     fn show_message(&self, message: &super::Message) -> Result<()>;
 }

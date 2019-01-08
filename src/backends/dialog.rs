@@ -5,7 +5,7 @@ use std::io;
 use std::io::Result;
 use std::process;
 
-use crate::Message;
+use crate::{Input, Message};
 
 /// The `dialog` backend.
 ///
@@ -26,20 +26,6 @@ impl Dialog {
             height: "0".to_string(),
             width: "0".to_string(),
         }
-    }
-
-    fn execute(&self, args: Vec<&str>) -> Result<process::Output> {
-        let mut args = args;
-        if let Some(ref backtitle) = self.backtitle {
-            args.insert(0, "--backtitle");
-            args.insert(1, backtitle);
-        }
-        println!("{:?}", args);
-        process::Command::new("dialog")
-            .args(args)
-            .stdin(process::Stdio::inherit())
-            .stdout(process::Stdio::inherit())
-            .output()
     }
 
     /// Sets the backtitle for the dialog boxes.
@@ -65,15 +51,31 @@ impl Dialog {
         self.width = width.to_string();
     }
 
-    fn show_box(&self, args: Vec<&str>, title: &Option<String>) -> Result<process::Output> {
-        let mut args = args;
-        if let Some(ref title) = title {
-            args.insert(0, "--title");
-            args.insert(1, title);
+    fn execute(
+        &self,
+        args: Vec<&str>,
+        post_args: Vec<&str>,
+        title: &Option<String>,
+    ) -> Result<process::Output> {
+        let mut command = process::Command::new("dialog");
+        command.stdin(process::Stdio::inherit());
+        command.stdout(process::Stdio::inherit());
+
+        if let Some(ref backtitle) = self.backtitle {
+            command.arg("--backtitle");
+            command.arg(backtitle);
         }
-        args.push(&self.height);
-        args.push(&self.width);
-        self.execute(args)
+        if let Some(ref title) = title {
+            command.arg("--title");
+            command.arg(title);
+        }
+
+        command.args(args);
+        command.arg(&self.height);
+        command.arg(&self.width);
+        command.args(post_args);
+
+        command.output()
     }
 }
 
@@ -85,10 +87,47 @@ fn require_success(status: process::ExitStatus) -> Result<()> {
     }
 }
 
+fn get_stderr(output: process::Output) -> Result<Option<String>> {
+    if output.status.success() {
+        String::from_utf8(output.stderr)
+            .map(|s| Some(s))
+            .map_err(|_| {
+                io::Error::new(io::ErrorKind::Other, "Input contained invalid UTF-8 bytes")
+            })
+    } else {
+        if let Some(code) = output.status.code() {
+            match code {
+                0 => Ok(None),
+                1 => Ok(None),
+                -1 => Ok(None),
+                _ => Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    "Could not execute dialog",
+                )),
+            }
+        } else {
+            Err(io::Error::new(
+                io::ErrorKind::Other,
+                "dialog was terminated by a signal",
+            ))
+        }
+    }
+}
+
 impl super::Backend for Dialog {
+    fn show_input(&self, input: &Input) -> Result<Option<String>> {
+        let args = vec!["--inputbox", &input.text];
+        let mut post_args: Vec<&str> = Vec::new();
+        if let Some(ref default) = input.default {
+            post_args.push(default);
+        }
+        self.execute(args, post_args, &input.title)
+            .and_then(get_stderr)
+    }
+
     fn show_message(&self, message: &Message) -> Result<()> {
         let args = vec!["--msgbox", &message.text];
-        self.show_box(args, &message.title)
+        self.execute(args, vec![], &message.title)
             .and_then(|output| require_success(output.status))
             .map(|_| ())
     }

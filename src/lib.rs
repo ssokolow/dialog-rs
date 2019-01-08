@@ -7,6 +7,7 @@
 //!
 //! The `dialog` crate can be used to display different types of dialog boxes.  The supported types
 //! are:
+//! - [`Input`][]: a text input dialog
 //! - [`Message`][]: a simple message box
 //!
 //! These dialog boxes can be displayed using various backends:
@@ -45,8 +46,24 @@
 //!     .expect("Could not display dialog box");
 //! ```
 //!
-//! [`Message`]: struct.Message.html
+//! Query a string from the user:
+//!
+//! ```no_run
+//! use dialog::DialogBox;
+//!
+//! let name = dialog::Input::new("Please enter your name")
+//!     .title("Name")
+//!     .show()
+//!     .expect("Could not display dialog box");
+//! match name {
+//!     Some(name) => println!("Hello {}!", name),
+//!     None => println!("Hello stranger!"),
+//! };
+//! ```
+//!
 //! [`Dialog`]: backends/struct.Dialog.html
+//! [`Input`]: struct.Input.html
+//! [`Message`]: struct.Message.html
 //! [`default_backend`]: fn.default_backend.html
 //! [`show`]: trait.DialogBox.html#method.show
 //! [`show_with`]: trait.DialogBox.html#method.show_with
@@ -69,14 +86,14 @@ pub trait DialogBox {
     /// The type of the data returned by the dialog box.
     type Output;
 
-    /// Shows this dialog box using the default backend.
+    /// Shows this dialog box using the default backend and returns the output.
     ///
     /// `box.show()` is a shorthand for `box.show_with(&default_backend())`.
     fn show(&self) -> Result<Self::Output> {
         self.show_with(&default_backend())
     }
 
-    /// Shows this dialog box using the given backend.
+    /// Shows this dialog box using the given backend and returns the output.
     fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output>;
 }
 
@@ -123,6 +140,66 @@ impl DialogBox for Message {
 
     fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
         backend.show_message(self)
+    }
+}
+
+/// A dialog box with a text input field.
+///
+/// This dialog box displays a text and an input field.  It returns the text entered by the user or
+/// `None` if the user cancelled the dialog.
+///
+/// # Example
+///
+/// ```no_run
+/// use dialog::DialogBox;
+///
+/// let name = dialog::Input::new("Please enter your name")
+///     .title("Name")
+///     .show()
+///     .expect("Could not display dialog box");
+/// match name {
+///     Some(name) => println!("Hello {}!", name),
+///     None => println!("Hello stranger!"),
+/// };
+/// ```
+pub struct Input {
+    text: String,
+    title: Option<String>,
+    default: Option<String>,
+}
+
+impl Input {
+    /// Creates a new input dialog box with the given text.
+    pub fn new(text: impl Into<String>) -> Input {
+        Input {
+            text: text.into(),
+            title: None,
+            default: None,
+        }
+    }
+
+    /// Sets the title of this input box.
+    ///
+    /// This method returns a reference to `self` to enable chaining.
+    pub fn title(&mut self, title: impl Into<String>) -> &mut Input {
+        self.title = Some(title.into());
+        self
+    }
+
+    /// Sets the default value of this input box.
+    ///
+    /// This method returns a reference to `self` to enable chaining.
+    pub fn default(&mut self, default: impl Into<String>) -> &mut Input {
+        self.default = Some(default.into());
+        self
+    }
+}
+
+impl DialogBox for Input {
+    type Output = Option<String>;
+
+    fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
+        backend.show_input(self)
     }
 }
 
