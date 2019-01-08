@@ -28,14 +28,18 @@ impl Dialog {
         }
     }
 
-    fn execute(&self, args: Vec<&str>) -> Result<process::ExitStatus> {
+    fn execute(&self, args: Vec<&str>) -> Result<process::Output> {
         let mut args = args;
         if let Some(ref backtitle) = self.backtitle {
             args.insert(0, "--backtitle");
             args.insert(1, backtitle);
         }
         println!("{:?}", args);
-        process::Command::new("dialog").args(args).status()
+        process::Command::new("dialog")
+            .args(args)
+            .stdin(process::Stdio::inherit())
+            .stdout(process::Stdio::inherit())
+            .output()
     }
 
     /// Sets the backtitle for the dialog boxes.
@@ -61,7 +65,7 @@ impl Dialog {
         self.width = width.to_string();
     }
 
-    fn show_box(&self, args: Vec<&str>, title: &Option<String>) -> Result<process::ExitStatus> {
+    fn show_box(&self, args: Vec<&str>, title: &Option<String>) -> Result<process::Output> {
         let mut args = args;
         if let Some(ref title) = title {
             args.insert(0, "--title");
@@ -85,6 +89,7 @@ impl super::Backend for Dialog {
     fn show_message(&self, message: &Message) -> Result<()> {
         let args = vec!["--msgbox", &message.text];
         self.show_box(args, &message.title)
-            .and_then(require_success)
+            .and_then(|output| require_success(output.status))
+            .map(|_| ())
     }
 }
