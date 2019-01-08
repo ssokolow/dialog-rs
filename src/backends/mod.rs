@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 mod dialog;
+mod zenity;
 
 pub use crate::backends::dialog::Dialog;
+pub use crate::backends::zenity::Zenity;
 
 use crate::Result;
 
