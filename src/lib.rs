@@ -9,6 +9,7 @@
 //! are:
 //! - [`Input`][]: a text input dialog
 //! - [`Message`][]: a simple message box
+//! - [`Password`][]: a password input dialog
 //! - [`Question`][]: a question dialog box
 //!
 //! These dialog boxes can be displayed using various backends:
@@ -65,6 +66,7 @@
 //! [`Dialog`]: backends/struct.Dialog.html
 //! [`Input`]: struct.Input.html
 //! [`Message`]: struct.Message.html
+//! [`Password`]: struct.Password.html
 //! [`Question`]: struct.Question.html
 //! [`default_backend`]: fn.default_backend.html
 //! [`show`]: trait.DialogBox.html#method.show
@@ -255,6 +257,56 @@ impl DialogBox for Input {
 
     fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
         backend.show_input(self)
+    }
+}
+
+/// A dialog box with a password input field.
+///
+/// This dialog box displays a text and a password input field.  It returns the password entered by
+/// the user or `None` if the user cancelled the dialog.
+///
+/// # Example
+///
+/// ```no_run
+/// use dialog::DialogBox;
+///
+/// let password = dialog::Password::new("Please enter a new password")
+///     .title("Password")
+///     .show()
+///     .expect("Could not display dialog box");
+/// match password {
+///     Some(password) => println!("Your new password is: {}", password),
+///     None => println!("You do not want to have a password."),
+/// };
+/// ```
+pub struct Password {
+    text: String,
+    title: Option<String>,
+}
+
+impl Password {
+    /// Creates a new password dialog box with the given text.
+    pub fn new(text: impl Into<String>) -> Password {
+        Password {
+            text: text.into(),
+            title: None,
+        }
+    }
+
+    /// Sets the title of this password dialog box.
+    ///
+    /// This method returns a reference to `self` to enable chaining.
+    pub fn title(&mut self, title: impl Into<String>) -> &mut Password {
+        self.title = Some(title.into());
+        self
+    }
+}
+
+impl DialogBox for Password {
+    type Output = Option<String>;
+
+    fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
+        backend.show_password(self)
     }
 }
 

@@ -23,6 +23,9 @@ pub trait Backend {
     /// Shows the given message dialog.
     fn show_message(&self, message: &super::Message) -> Result<()>;
 
+    /// Shows the given password dialog and returns the password.
+    fn show_password(&self, password: &super::Password) -> Result<Option<String>>;
+
     /// Shows the given question dialog and returns the choice.
     fn show_question(&self, question: &super::Question) -> Result<super::Choice>;
 }

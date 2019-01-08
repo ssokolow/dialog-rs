@@ -3,7 +3,7 @@
 
 use std::process;
 
-use crate::{Choice, Error, Input, Message, Question, Result};
+use crate::{Choice, Error, Input, Message, Password, Question, Result};
 
 /// The `dialog` backend.
 ///
@@ -133,6 +133,12 @@ impl super::Backend for Dialog {
         self.execute(args, vec![], &message.title)
             .and_then(|output| require_success(output.status))
             .map(|_| ())
+    }
+
+    fn show_password(&self, password: &Password) -> Result<Option<String>> {
+        let args = vec!["--passwordbox", &password.text];
+        self.execute(args, vec![], &password.title)
+            .and_then(get_stderr)
     }
 
     fn show_question(&self, question: &Question) -> Result<Choice> {
