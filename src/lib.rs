@@ -15,6 +15,8 @@
 //! These dialog boxes can be displayed using various backends:
 //! - [`Dialog`][]: uses `dialog` to display ncurses-based dialog boxes (requires the external
 //!   `dialog` tool)
+//! - [`Zenity`][]: uses `zenity` to display GTK-based dialog boxes (requires the external `zenity`
+//!   tool)
 //!
 //! You can let `dialog` choose the backend by calling the [`show`][] method on a dialog box.  If
 //! you want to choose the backend yourself, create a backend instance and pass it to
