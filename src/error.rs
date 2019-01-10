@@ -1,6 +1,7 @@
 // Copyright (C) 2019 Robin Krahl <robin.krahl@ireas.org>
 // SPDX-License-Identifier: MIT
 
+use std::fmt;
 use std::io;
 use std::process;
 use std::result;
@@ -19,6 +20,16 @@ pub enum Error {
     IoError(io::Error),
     /// An UTF-8 error.
     Utf8Error(str::Utf8Error),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Error::Error(ref s) => write!(f, "Error: {}", s),
+            Error::IoError(ref e) => write!(f, "I/O error: {}", e),
+            Error::Utf8Error(ref e) => write!(f, "UTF-8 error: {}", e),
+        }
+    }
 }
 
 impl From<&str> for Error {
