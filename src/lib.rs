@@ -72,6 +72,8 @@
 //! [`show`]: trait.DialogBox.html#method.show
 //! [`show_with`]: trait.DialogBox.html#method.show_with
 
+mod error;
+
 /// Backends that display dialog boxes.
 ///
 /// All backends implement the [`Backend`][] trait.  Some backends might provide additional
@@ -81,60 +83,7 @@
 /// [`Backend`]: trait.Backend.html
 pub mod backends;
 
-use std::io;
-use std::process;
-use std::result;
-use std::str;
-use std::string;
-
-/// A result returned by `dialog`.
-pub type Result<T> = result::Result<T, Error>;
-
-/// An error returned by `dialog`.
-#[derive(Debug)]
-pub enum Error {
-    /// A general error with an error message.
-    Error(String),
-    /// An input or output error.
-    IoError(io::Error),
-    /// An UTF-8 error.
-    Utf8Error(str::Utf8Error),
-}
-
-impl From<&str> for Error {
-    fn from(string: &str) -> Error {
-        Error::Error(string.to_string())
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Error {
-        Error::IoError(error)
-    }
-}
-
-impl From<str::Utf8Error> for Error {
-    fn from(error: str::Utf8Error) -> Error {
-        Error::Utf8Error(error)
-    }
-}
-
-impl From<string::FromUtf8Error> for Error {
-    fn from(error: string::FromUtf8Error) -> Error {
-        Error::Utf8Error(error.utf8_error())
-    }
-}
-
-impl From<(&str, process::ExitStatus)> for Error {
-    fn from(data: (&str, process::ExitStatus)) -> Error {
-        let (command, status) = data;
-        let msg = match status.code() {
-            Some(code) => format!("Command {} failed with exit status {}", command, code),
-            None => format!("Command {} was terminated by a signal", command),
-        };
-        Error::Error(msg)
-    }
-}
+pub use crate::error::{Error, Result};
 
 /// A dialog box that can be shown using a backend.
 ///
