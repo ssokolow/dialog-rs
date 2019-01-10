@@ -14,4 +14,5 @@ mail to [dialog-rs-dev@ireas.org][].
 This project is licensed under the [MIT License][].
 
 [Documentation]: https://docs.rs/dialog
+[dialog-rs-dev@ireas.org]: mailto:dialog-rs-dev@ireas.org
 [MIT license]: https://opensource.org/licenses/MIT
