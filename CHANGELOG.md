@@ -1,4 +1,4 @@
-# Unreleased
+# v0.1.1 (2019-01-11)
 - Add the `Password` dialog box.
 - Add the `Zenity` backend.
 - Implement `std::fmt::Display` for the `Error` enum.
