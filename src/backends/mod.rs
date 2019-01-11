@@ -31,3 +31,11 @@ pub trait Backend {
     /// Shows the given question dialog and returns the choice.
     fn show_question(&self, question: &super::Question) -> Result<super::Choice>;
 }
+
+pub(crate) fn from_str(s: &str) -> Option<Box<dyn Backend>> {
+    match s.to_lowercase().as_ref() {
+        "dialog" => Some(Box::new(Dialog::new())),
+        "zenity" => Some(Box::new(Zenity::new())),
+        _ => None,
+    }
+}

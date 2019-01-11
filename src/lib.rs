@@ -85,6 +85,8 @@ mod error;
 /// [`Backend`]: trait.Backend.html
 pub mod backends;
 
+use std::env;
+
 pub use crate::error::{Error, Result};
 
 /// A dialog box that can be shown using a backend.
@@ -335,9 +337,19 @@ impl DialogBox for Question {
 
 /// Creates a new instance of the default backend.
 ///
-/// The current implementation always returns a [`Dialog`][] instance.
+/// The following steps are performed to determine the default backend:
+/// - If the `DIALOG` environment variable is set to a valid backend name, this backend is used.
+///   A valid backend name is the name of a struct in the `backends` module implementing the
+///   `Backend` trait in any case.
+/// - Otherwise, a [`Dialog`][] instance is returned.
 ///
 /// [`Dialog`]: backends/struct.Dialog.html
 pub fn default_backend() -> Box<dyn backends::Backend> {
+    if let Ok(backend) = env::var("DIALOG") {
+        if let Some(backend) = backends::from_str(&backend) {
+            return backend;
+        }
+    }
+
     Box::new(backends::Dialog::new())
 }

@@ -1,5 +1,6 @@
 # Unreleased
-- Refactor `default_backend()` to return a `Box<dyn Backend>`.
+- Refactor `default_backend` to return a `Box<dyn Backend>`.
+- Check the `DIALOG` environment variable in `default_backend`.
 
 # v0.1.1 (2019-01-11)
 - Add the `Password` dialog box.
