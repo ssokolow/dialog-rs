@@ -72,6 +72,8 @@
 //! [`Message`]: struct.Message.html
 //! [`Password`]: struct.Password.html
 //! [`Question`]: struct.Question.html
+//! [`Stdio`]: backends/struct.Stdio.html
+//! [`Zenity`]: backends/struct.Zenity.html
 //! [`default_backend`]: fn.default_backend.html
 //! [`show`]: trait.DialogBox.html#method.show
 //! [`show_with`]: trait.DialogBox.html#method.show_with
