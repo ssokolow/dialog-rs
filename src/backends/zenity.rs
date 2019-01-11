@@ -59,6 +59,10 @@ impl Zenity {
         self.timeout = Some(timeout.to_string());
     }
 
+    pub(crate) fn is_available() -> bool {
+        super::is_available("zenity")
+    }
+
     fn execute(&self, args: Vec<&str>, title: &Option<String>) -> Result<process::Output> {
         let mut command = process::Command::new("zenity");
 

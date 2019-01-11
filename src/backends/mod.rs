@@ -7,6 +7,9 @@ mod zenity;
 pub use crate::backends::dialog::Dialog;
 pub use crate::backends::zenity::Zenity;
 
+use std::env;
+use std::path;
+
 use crate::Result;
 
 /// A dialog backend.
@@ -30,6 +33,17 @@ pub trait Backend {
 
     /// Shows the given question dialog and returns the choice.
     fn show_question(&self, question: &super::Question) -> Result<super::Choice>;
+}
+
+pub(crate) fn is_available(name: &str) -> bool {
+    if let Ok(path) = env::var("PATH") {
+        for part in path.split(":") {
+            if path::Path::new(part).join(name).exists() {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 pub(crate) fn from_str(s: &str) -> Option<Box<dyn Backend>> {

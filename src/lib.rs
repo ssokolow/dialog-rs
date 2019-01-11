@@ -341,13 +341,25 @@ impl DialogBox for Question {
 /// - If the `DIALOG` environment variable is set to a valid backend name, this backend is used.
 ///   A valid backend name is the name of a struct in the `backends` module implementing the
 ///   `Backend` trait in any case.
+/// - If the `DISPLAY` environment variable is set, the first available backend from this list is
+///   used:
+///   - [`Zenity`][]
 /// - Otherwise, a [`Dialog`][] instance is returned.
 ///
 /// [`Dialog`]: backends/struct.Dialog.html
+/// [`Zenity`]: backends/struct.Zenity.html
 pub fn default_backend() -> Box<dyn backends::Backend> {
     if let Ok(backend) = env::var("DIALOG") {
         if let Some(backend) = backends::from_str(&backend) {
             return backend;
+        }
+    }
+
+    if let Ok(display) = env::var("DISPLAY") {
+        if !display.is_empty() {
+            if backends::Zenity::is_available() {
+                return Box::new(backends::Zenity::new());
+            }
         }
     }
 
