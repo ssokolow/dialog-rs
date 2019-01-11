@@ -96,13 +96,15 @@ pub trait DialogBox {
 
     /// Shows this dialog box using the default backend and returns the output.
     ///
-    /// `box.show()` is a shorthand for `box.show_with(&default_backend())`.
+    /// `box.show()` is a shorthand for `box.show_with(default_backend())`.
     fn show(&self) -> Result<Self::Output> {
-        self.show_with(&default_backend())
+        self.show_with(default_backend())
     }
 
     /// Shows this dialog box using the given backend and returns the output.
-    fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output>;
+    fn show_with<B>(&self, backend: impl AsRef<B>) -> Result<Self::Output>
+    where
+        B: backends::Backend + ?Sized;
 }
 
 /// A message box.
@@ -146,8 +148,11 @@ impl Message {
 impl DialogBox for Message {
     type Output = ();
 
-    fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
-        backend.show_message(self)
+    fn show_with<B>(&self, backend: impl AsRef<B>) -> Result<Self::Output>
+    where
+        B: backends::Backend + ?Sized,
+    {
+        backend.as_ref().show_message(self)
     }
 }
 
@@ -206,8 +211,11 @@ impl Input {
 impl DialogBox for Input {
     type Output = Option<String>;
 
-    fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
-        backend.show_input(self)
+    fn show_with<B>(&self, backend: impl AsRef<B>) -> Result<Self::Output>
+    where
+        B: backends::Backend + ?Sized,
+    {
+        backend.as_ref().show_input(self)
     }
 }
 
@@ -256,8 +264,11 @@ impl Password {
 impl DialogBox for Password {
     type Output = Option<String>;
 
-    fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
-        backend.show_password(self)
+    fn show_with<B>(&self, backend: impl AsRef<B>) -> Result<Self::Output>
+    where
+        B: backends::Backend + ?Sized,
+    {
+        backend.as_ref().show_password(self)
     }
 }
 
@@ -314,8 +325,11 @@ impl Question {
 impl DialogBox for Question {
     type Output = Choice;
 
-    fn show_with(&self, backend: &impl backends::Backend) -> Result<Self::Output> {
-        backend.show_question(self)
+    fn show_with<B>(&self, backend: impl AsRef<B>) -> Result<Self::Output>
+    where
+        B: backends::Backend + ?Sized,
+    {
+        backend.as_ref().show_question(self)
     }
 }
 
@@ -324,6 +338,6 @@ impl DialogBox for Question {
 /// The current implementation always returns a [`Dialog`][] instance.
 ///
 /// [`Dialog`]: backends/struct.Dialog.html
-pub fn default_backend() -> impl backends::Backend {
-    backends::Dialog::new()
+pub fn default_backend() -> Box<dyn backends::Backend> {
+    Box::new(backends::Dialog::new())
 }

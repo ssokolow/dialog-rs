@@ -1,3 +1,6 @@
+# Unreleased
+- Refactor `default_backend()` to return a `Box<dyn Backend>`.
+
 # v0.1.1 (2019-01-11)
 - Add the `Password` dialog box.
 - Add the `Zenity` backend.

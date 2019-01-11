@@ -88,6 +88,12 @@ impl Zenity {
     }
 }
 
+impl AsRef<Zenity> for Zenity {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
 fn require_success(status: process::ExitStatus) -> Result<()> {
     if status.success() {
         Ok(())

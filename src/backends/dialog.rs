@@ -77,6 +77,12 @@ impl Dialog {
     }
 }
 
+impl AsRef<Dialog> for Dialog {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
 fn require_success(status: process::ExitStatus) -> Result<()> {
     if status.success() {
         Ok(())
