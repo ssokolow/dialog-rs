@@ -12,3 +12,4 @@ readme = "README.md"
 license = "MIT"
 
 [dependencies]
+rpassword = "2"

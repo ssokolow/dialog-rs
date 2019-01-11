@@ -15,6 +15,8 @@
 //! These dialog boxes can be displayed using various backends:
 //! - [`Dialog`][]: uses `dialog` to display ncurses-based dialog boxes (requires the external
 //!   `dialog` tool)
+//! - [`Stdio`][]: prints messages to the standard output and reads user input form standard input
+//!   (intended as a fallback backend)
 //! - [`Zenity`][]: uses `zenity` to display GTK-based dialog boxes (requires the external `zenity`
 //!   tool)
 //!
@@ -344,9 +346,11 @@ impl DialogBox for Question {
 /// - If the `DISPLAY` environment variable is set, the first available backend from this list is
 ///   used:
 ///   - [`Zenity`][]
-/// - Otherwise, a [`Dialog`][] instance is returned.
+/// - If the [`Dialog`][] backend is available, it is used.
+/// - Otherwise, a [`Stdio`][] instance is returned.
 ///
 /// [`Dialog`]: backends/struct.Dialog.html
+/// [`Stdio`]: backends/struct.Stdio.html
 /// [`Zenity`]: backends/struct.Zenity.html
 pub fn default_backend() -> Box<dyn backends::Backend> {
     if let Ok(backend) = env::var("DIALOG") {
@@ -363,5 +367,9 @@ pub fn default_backend() -> Box<dyn backends::Backend> {
         }
     }
 
-    Box::new(backends::Dialog::new())
+    if backends::Dialog::is_available() {
+        Box::new(backends::Dialog::new())
+    } else {
+        Box::new(backends::Stdio::new())
+    }
 }

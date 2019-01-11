@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 mod dialog;
+mod stdio;
 mod zenity;
 
 pub use crate::backends::dialog::Dialog;
+pub use crate::backends::stdio::Stdio;
 pub use crate::backends::zenity::Zenity;
 
 use std::env;
@@ -49,6 +51,7 @@ pub(crate) fn is_available(name: &str) -> bool {
 pub(crate) fn from_str(s: &str) -> Option<Box<dyn Backend>> {
     match s.to_lowercase().as_ref() {
         "dialog" => Some(Box::new(Dialog::new())),
+        "stdio" => Some(Box::new(Stdio::new())),
         "zenity" => Some(Box::new(Zenity::new())),
         _ => None,
     }

@@ -49,6 +49,10 @@ impl Dialog {
         self.width = width.to_string();
     }
 
+    pub(crate) fn is_available() -> bool {
+        super::is_available("dialog")
+    }
+
     fn execute(
         &self,
         args: Vec<&str>,
