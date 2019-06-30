@@ -128,8 +128,8 @@ fn get_choice(status: process::ExitStatus) -> Result<Choice> {
 
 fn get_stdout(output: process::Output) -> Result<Option<String>> {
     if output.status.success() {
-        String::from_utf8(output.stderr)
-            .map(|s| Some(s))
+        String::from_utf8(output.stdout)
+            .map(|s| Some(s.trim_end_matches('\n').to_string()))
             .map_err(|err| Error::from(err))
     } else {
         if let Some(code) = output.status.code() {

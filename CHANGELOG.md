@@ -1,3 +1,9 @@
+# Unreleased
+- Fix the input and password dialogs for the `zenity` backend (thanks Silvano
+  Cortesi for the bug report):
+  - Read from `stdout` instead of `stderr`.
+  - Remove trailing newlines from the result.
+
 # v0.2.0 (2019-01-11)
 - Refactor `default_backend` to return a `Box<dyn Backend>`.
 - Check the `DIALOG` and `DISPLAY` environment variables in `default_backend`.
