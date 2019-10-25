@@ -5,8 +5,9 @@ A Rust library for displaying dialog boxes using various backends.
 [Documentation][]
 
 Currently `dialog-rs` supports input, message, password and question dialogs.
-It can use the `dialog` or `zenity` tools to display the dialog boxes.  If none
-of these tools is available, the dialogs are printed to the standard output.
+It can use the `dialog`, `kdialog`, or `zenity` tools to display the dialog
+boxes.  If none of these tools is available, the dialogs are printed to the
+standard output.
 
 ## Example
 

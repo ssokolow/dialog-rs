@@ -15,6 +15,8 @@
 //! These dialog boxes can be displayed using various backends:
 //! - [`Dialog`][]: uses `dialog` to display ncurses-based dialog boxes (requires the external
 //!   `dialog` tool)
+//! - [`KDialog`][]: uses `kdialog` to display Qt-based dialog boxes (requires the external
+//!   `kdialog` tool)
 //! - [`Stdio`][]: prints messages to the standard output and reads user input form standard input
 //!   (intended as a fallback backend)
 //! - [`Zenity`][]: uses `zenity` to display GTK-based dialog boxes (requires the external `zenity`
@@ -72,6 +74,7 @@
 //! [`Message`]: struct.Message.html
 //! [`Password`]: struct.Password.html
 //! [`Question`]: struct.Question.html
+//! [`KDialog`]: backends/struct.KDialog.html
 //! [`Stdio`]: backends/struct.Stdio.html
 //! [`Zenity`]: backends/struct.Zenity.html
 //! [`default_backend`]: fn.default_backend.html
@@ -345,13 +348,15 @@ impl DialogBox for Question {
 /// - If the `DIALOG` environment variable is set to a valid backend name, this backend is used.
 ///   A valid backend name is the name of a struct in the `backends` module implementing the
 ///   `Backend` trait in any case.
-/// - If the `DISPLAY` environment variable is set, the first available backend from this list is
-///   used:
+/// - If the `DISPLAY` environment variable is set, the following resolution algorithm is used:
+///   - If `XDG_CURRENT_DESKTOP=KDE`, [`KDialog`][]
 ///   - [`Zenity`][]
+///   - [`KDialog`][]
 /// - If the [`Dialog`][] backend is available, it is used.
 /// - Otherwise, a [`Stdio`][] instance is returned.
 ///
 /// [`Dialog`]: backends/struct.Dialog.html
+/// [`KDialog`]: backends/struct.KDialog.html
 /// [`Stdio`]: backends/struct.Stdio.html
 /// [`Zenity`]: backends/struct.Zenity.html
 pub fn default_backend() -> Box<dyn backends::Backend> {
@@ -361,10 +366,23 @@ pub fn default_backend() -> Box<dyn backends::Backend> {
         }
     }
 
+    // Prefer KDialog over Zenity if the user is logged into a KDE session
+    let kdialog_available = backends::KDialog::is_available();
+    if let Ok(desktop) = env::var("XDG_CURRENT_DESKTOP") {
+        if kdialog_available && desktop == "KDE" {
+            return Box::new(backends::KDialog::new());
+        }
+    }
+
     if let Ok(display) = env::var("DISPLAY") {
         if !display.is_empty() {
             if backends::Zenity::is_available() {
                 return Box::new(backends::Zenity::new());
+            }
+
+            // Prefer Zenity over KDialog if the user is not logged into a KDE session
+            if kdialog_available {
+                return Box::new(backends::KDialog::new());
             }
         }
     }

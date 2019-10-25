@@ -4,10 +4,12 @@
 mod dialog;
 mod stdio;
 mod zenity;
+mod kdialog;
 
 pub use crate::backends::dialog::Dialog;
 pub use crate::backends::stdio::Stdio;
 pub use crate::backends::zenity::Zenity;
+pub use crate::backends::kdialog::KDialog;
 
 use std::env;
 use std::path;
@@ -51,6 +53,7 @@ pub(crate) fn is_available(name: &str) -> bool {
 pub(crate) fn from_str(s: &str) -> Option<Box<dyn Backend>> {
     match s.to_lowercase().as_ref() {
         "dialog" => Some(Box::new(Dialog::new())),
+        "kdialog" => Some(Box::new(KDialog::new())),
         "stdio" => Some(Box::new(Stdio::new())),
         "zenity" => Some(Box::new(Zenity::new())),
         _ => None,

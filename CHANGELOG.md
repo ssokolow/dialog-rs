@@ -1,3 +1,6 @@
+# Git HEAD
+- Add the `KDialog` backend. (contributed by Stephan Sokolow)
+
 # v0.2.1 (2019-06-30)
 - Fix the input and password dialogs for the `zenity` backend (thanks Silvano
   Cortesi for the bug report):
