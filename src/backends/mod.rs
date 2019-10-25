@@ -41,7 +41,7 @@ pub trait Backend {
 
 pub(crate) fn is_available(name: &str) -> bool {
     if let Ok(path) = env::var("PATH") {
-        for part in path.split(":") {
+        for part in path.split(':') {
             if path::Path::new(part).join(name).exists() {
                 return true;
             }

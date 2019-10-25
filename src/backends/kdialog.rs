@@ -76,15 +76,13 @@ impl AsRef<KDialog> for KDialog {
 fn require_success(status: process::ExitStatus) -> Result<()> {
     if status.success() {
         Ok(())
-    } else {
-        if let Some(code) = status.code() {
-            match code {
-                CANCEL => Ok(()),
-                _ => Err(Error::from(("kdialog", status))),
-            }
-        } else {
-            Err(Error::from(("kdialog", status)))
+    } else if let Some(code) = status.code() {
+        match code {
+            CANCEL => Ok(()),
+            _ => Err(Error::from(("kdialog", status))),
         }
+    } else {
+        Err(Error::from(("kdialog", status)))
     }
 }
 
@@ -104,17 +102,15 @@ fn get_stdout(output: process::Output) -> Result<Option<String>> {
     if output.status.success() {
         String::from_utf8(output.stdout)
             .map(|s| Some(s.trim_end_matches('\n').to_string()))
-            .map_err(|err| Error::from(err))
-    } else {
-        if let Some(code) = output.status.code() {
-            match code {
-                OK => Ok(None),
-                CANCEL => Ok(None),
-                _ => Err(Error::from(("kdialog", output.status))),
-            }
-        } else {
-            Err(Error::from(("kdialog", output.status)))
+            .map_err(Error::from)
+    } else if let Some(code) = output.status.code() {
+        match code {
+            OK => Ok(None),
+            CANCEL => Ok(None),
+            _ => Err(Error::from(("kdialog", output.status))),
         }
+    } else {
+        Err(Error::from(("kdialog", output.status)))
     }
 }
 

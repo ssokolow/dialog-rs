@@ -35,7 +35,7 @@ fn print_title(title: &Option<String>) {
 fn read_input() -> Result<String> {
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;
-    Ok(input.trim_end_matches("\n").to_string())
+    Ok(input.trim_end_matches('\n').to_string())
 }
 
 fn parse_choice(input: &str) -> Choice {

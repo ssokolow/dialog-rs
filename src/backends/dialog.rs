@@ -111,19 +111,17 @@ fn get_choice(status: process::ExitStatus) -> Result<Choice> {
 fn get_stderr(output: process::Output) -> Result<Option<String>> {
     if output.status.success() {
         String::from_utf8(output.stderr)
-            .map(|s| Some(s))
-            .map_err(|err| Error::from(err))
-    } else {
-        if let Some(code) = output.status.code() {
-            match code {
-                0 => Ok(None),
-                1 => Ok(None),
-                255 => Ok(None),
-                _ => Err(Error::from(("dialog", output.status))),
-            }
-        } else {
-            Err(Error::from(("dialog", output.status)))
+            .map(Some)
+            .map_err(Error::from)
+    } else if let Some(code) = output.status.code() {
+        match code {
+            0 => Ok(None),
+            1 => Ok(None),
+            255 => Ok(None),
+            _ => Err(Error::from(("dialog", output.status))),
         }
+    } else {
+        Err(Error::from(("dialog", output.status)))
     }
 }
 
