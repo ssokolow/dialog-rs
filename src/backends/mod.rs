@@ -23,7 +23,7 @@ use crate::Result;
 /// backend and create an instance manually.  To use a backend, pass it to the [`show_with`][]
 /// method of a dialog box.
 ///
-/// [`default_backend`]: ../function.default_backend.html
+/// [`default_backend`]: ../fn.default_backend.html
 /// [`show_with`]: ../trait.DialogBox.html#method.show_with
 pub trait Backend {
     /// Shows the given input dialog and returns the input.
